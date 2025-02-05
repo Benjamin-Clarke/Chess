@@ -33,8 +33,9 @@ public class Rook extends Piece {
 		
         if (image != null) {
         	this.setBackground(null);
-        	image.paintIcon(this, g, 0, 0);
-        
+        	image.paintIcon(this, g, getxSquare()*SQUARE_SIZE, getySquare()*SQUARE_SIZE);
+        	
+        	//0,0 0,560
         } else {
             g.drawString("Image not found!", 50, 50);
         }

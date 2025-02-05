@@ -3,6 +3,7 @@ import javax.swing.JPanel;
 
 public abstract class Piece extends JPanel {
     private static final long serialVersionUID = 1L;
+    public final int SQUARE_SIZE = 80;
     private boolean white = false;
     private boolean killed = false;
     private int xPixels;

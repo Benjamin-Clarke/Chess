@@ -1,22 +1,18 @@
-import java.awt.GridLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import javax.swing.*;
 
 public class Board {
 	
 	private JFrame frame;
 	private Square[][] squares;
-	private final int boardSizePixels = 640;
+	final int boardSizePixels = 640;
+	public final int SQUARE_SIZE = 80;
 	
-	public void createBoard() {
 	
-		frame = new JFrame("Chess");
-		frame.setSize(boardSizePixels,boardSizePixels);
-		frame.setLayout(new GridLayout(8,8));
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);
-		
-		//frame.setIconImage(new ImageIcon("images/white_pawn.png").getImage());
-		
+	public Board() {
+	
+		/*
 		squares = new Square[8][8];
 		
 		for(int i = 0; i < 8; i++) {
@@ -35,14 +31,27 @@ public class Board {
 			}	
 		}
 		
-		frame.setVisible(true);
+		*/
 		
 	}
 	
-	public void setDocIcon() {
-        this.frame.setIconImage(new ImageIcon("images/white_pawn.png").getImage());
+	public void draw(Graphics2D g2) {
+		
+		for(int row = 0; row < 8; row ++) {
+			for (int col = 0; col < 8; col++) {
+				
+				if( (row + col) % 2 == 0) {
+					//Make square dark color
+					g2.setColor(new Color(174,138,104));
+				} else {
+					//Make square light color
+					g2.setColor(new Color(236,218,185));
+				}
+				g2.fillRect(row*SQUARE_SIZE, col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+			}
+		}
 	}
-	
+
 	public JFrame getFrame() {
 		return frame;
 	}
