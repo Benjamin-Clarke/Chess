@@ -39,6 +39,26 @@ public class Pawn extends Piece {
         }
 		
 	}
+
+	@Override
+	public boolean canMove(int x, int y) {
+		
+		int moveDirection;
+		
+		if(isWhite()) {
+			moveDirection = -1;
+		} else {
+			moveDirection = 1;
+		}
+	
+		if (isWithinBoard(x, y)) { 
+			if(this.getPrevX() == x &&
+					y == (this.getPrevY() + moveDirection)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	
 

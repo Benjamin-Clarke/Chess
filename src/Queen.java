@@ -40,4 +40,15 @@ public class Queen extends Piece {
         }
 		
 	}
+	
+	@Override
+	public boolean canMove(int x, int y) {
+		if (isWithinBoard(x, y)) {
+			if(Math.abs(x - getPrevX()) == Math.abs(y - getPrevY()) ||
+					getPrevX() == x || getPrevY() == y) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

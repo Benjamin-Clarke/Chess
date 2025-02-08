@@ -40,4 +40,16 @@ public class King extends Piece {
         }
 		
 	}
+	
+	@Override
+	public boolean canMove(int x, int y) {
+		if (isWithinBoard(x, y)) {
+			
+			if(Math.abs(x - getPrevX()) + Math.abs(y - getPrevY()) == 1 ||
+					Math.abs(x - getPrevX()) * Math.abs(y - getPrevY()) == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

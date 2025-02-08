@@ -35,10 +35,19 @@ public class Rook extends Piece {
         	this.setBackground(null);
         	image.paintIcon(this, g, getxSquare()*SQUARE_SIZE, getySquare()*SQUARE_SIZE);
         	
-        	//0,0 0,560
         } else {
             g.drawString("Image not found!", 50, 50);
         }
 		
+	}
+
+	@Override
+	public boolean canMove(int x, int y) {
+		if (isWithinBoard(x, y)) {
+			if (getPrevX() == x || getPrevY() == y) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

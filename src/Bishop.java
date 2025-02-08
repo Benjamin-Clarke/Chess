@@ -40,4 +40,15 @@ public class Bishop extends Piece {
         }
 		
 	}
+
+
+	@Override
+	public boolean canMove(int x, int y) {
+		if (isWithinBoard(x, y)) {
+			if(Math.abs(x - getPrevX()) == Math.abs(y - getPrevY())) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
