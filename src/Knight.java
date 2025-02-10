@@ -43,10 +43,9 @@ public class Knight extends Piece {
 	
 	@Override
 	public boolean canMove(int x, int y) {
-		if (isWithinBoard(x, y)) {
-			if (Math.abs(getPrevX() - x) == 2 && Math.abs(getPrevY() - y) == 1 || 
-					Math.abs(getPrevY() - y) == 2 && Math.abs(getPrevX() - x) == 1
-					) {
+		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
+			if ( (Math.abs(getPrevX() - x) == 2 && Math.abs(getPrevY() - y) == 1 || 
+					Math.abs(getPrevY() - y) == 2 && Math.abs(getPrevX() - x) == 1) ) {
 				return true;
 			}
 		}

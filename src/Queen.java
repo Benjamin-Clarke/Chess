@@ -43,9 +43,9 @@ public class Queen extends Piece {
 	
 	@Override
 	public boolean canMove(int x, int y) {
-		if (isWithinBoard(x, y)) {
+		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
 			if(Math.abs(x - getPrevX()) == Math.abs(y - getPrevY()) ||
-					getPrevX() == x || getPrevY() == y) {
+					getPrevX() == x || getPrevY() == y ) {
 				return true;
 			}
 		}

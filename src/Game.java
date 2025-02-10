@@ -22,6 +22,8 @@ public class Game extends JPanel implements Runnable{
 	private Piece activePiece;
 	boolean canMove;
 	boolean validSquare;
+	boolean takePiece;
+	boolean whitesTurn = true;
 	
 	public Game() {
 		
@@ -79,14 +81,24 @@ public class Game extends JPanel implements Runnable{
     		
     		if(activePiece != null) {
     			
-    			if(validSquare) {
-    				//Update Position
-    				activePiece.setPrevX(activePiece.getxSquare());
-        			activePiece.setPrevY(activePiece.getySquare());
+    			//if (activePiece.isWhite() == whitesTurn) {
+	    			if(validSquare) {
+	    				//Update Position
+	    				activePiece.setPrevX(activePiece.getxSquare());
+	        			activePiece.setPrevY(activePiece.getySquare());
+	        			activePiece.setFirstMove(false);
+	        			
+	        			//Take piece 
+	        			if(takePiece) {
+	        				pieces.remove(activePiece.isHittingPiece(activePiece.getxSquare(), activePiece.getySquare()));
+	        			}
+        			
+	        			//whitesTurn = !whitesTurn;
+	    			//}
+	    			
     			} else {
     				//Reset Position
-    				activePiece.setxSquare(activePiece.getPrevX());
-    				activePiece.setySquare(activePiece.getPrevY());
+    				resetPiece();
     			}	
     			
     		}
@@ -95,9 +107,15 @@ public class Game extends JPanel implements Runnable{
     		
     }
     
+    public void resetPiece() {
+    	activePiece.setxSquare(activePiece.getPrevX());
+		activePiece.setySquare(activePiece.getPrevY());
+    }
+    
     private void simulate() {
     	canMove = false;
     	validSquare = false;
+    	takePiece = false;
     	
     	int tempX = (mouse.x) / board.SQUARE_SIZE;
 		int tempY = (mouse.y) / board.SQUARE_SIZE;
@@ -106,8 +124,15 @@ public class Game extends JPanel implements Runnable{
 			validSquare = true;
 			canMove = true;
 		}
+		
+		if (activePiece.canTake(tempX, tempY)) {
+			takePiece = true;
+		}
+		
+		
 		activePiece.setxSquare(tempX);
 		activePiece.setySquare(tempY);
+		
 		
 	}
 

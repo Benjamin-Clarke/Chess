@@ -44,11 +44,17 @@ public class Bishop extends Piece {
 
 	@Override
 	public boolean canMove(int x, int y) {
-		if (isWithinBoard(x, y)) {
-			if(Math.abs(x - getPrevX()) == Math.abs(y - getPrevY())) {
+		
+		//Check if hitting another piece
+		//setHittingPiece(isHittingPiece(x,y));
+		
+		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
+			if( (Math.abs(x - getPrevX()) == Math.abs(y - getPrevY())) 
+					&& !pieceOnDiagonalPath(getPrevX(), getPrevY(), x, y) ) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 }

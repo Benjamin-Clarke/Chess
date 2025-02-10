@@ -51,15 +51,47 @@ public class Pawn extends Piece {
 			moveDirection = 1;
 		}
 	
-		if (isWithinBoard(x, y)) { 
-			if(this.getPrevX() == x &&
-					y == (this.getPrevY() + moveDirection)) {
+		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) { 
+			
+			if( this.getPrevX() == x && (y == this.getPrevY() + (2*moveDirection)) && isFirstMove() 
+					&& !pieceInfrontOfPawn()) {
+				
+				return true;
+			} 
+			
+			//One space movement
+			if(this.getPrevX() == x && y == (this.getPrevY() + moveDirection)
+					&& !pieceInfrontOfPawn()) {
+					return true;
+			}
+			
+			//Taking Pieces 
+			setHittingPiece(isHittingPiece(x, y));
+			
+			if( Math.abs(this.getPrevX() - x) == 1 && y == (this.getPrevY() + moveDirection) 
+					&& getHittingPiece() != null) {
 				return true;
 			}
+			
+			
 		}
 		return false;
 	}
-	
-	
+
+	private boolean pieceInfrontOfPawn() {
+
+		
+		if(isWhite()) {
+			if(isHittingPiece(getPrevX(), getPrevY() - 1) != null) {
+				return true;
+			}
+		} else {
+			if(isHittingPiece(getPrevX(), getPrevY() + 1) != null) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 }
