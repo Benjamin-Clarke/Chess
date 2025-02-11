@@ -53,6 +53,7 @@ public class Pawn extends Piece {
 	
 		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) { 
 			
+			//Moving 2 spaces
 			if( this.getPrevX() == x && (y == this.getPrevY() + (2*moveDirection)) && isFirstMove() 
 					&& !pieceInfrontOfPawn()) {
 				

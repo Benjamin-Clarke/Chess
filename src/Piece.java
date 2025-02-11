@@ -42,6 +42,15 @@ public abstract class Piece extends JPanel {
     	return null;
     }
     
+    public Piece getPiece(int x, int y) {
+    	for (Piece piece: Game.pieces) {
+    		if (piece.getxSquare() == x && piece.getySquare() == y) {
+    			return piece;
+    		}
+    	}
+    	return null;
+    }
+    
     public boolean canTake(int x, int y) {
     	if(isHittingPiece(x, y) != null && isHittingPiece(x, y).isWhite() != this.isWhite()) {
     		return true;

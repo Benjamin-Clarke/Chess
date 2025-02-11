@@ -41,11 +41,11 @@ public class Board {
 			for (int col = 0; col < 8; col++) {
 				
 				if( (row + col) % 2 == 0) {
-					//Make square dark color
-					g2.setColor(new Color(174,138,104));
-				} else {
 					//Make square light color
 					g2.setColor(new Color(236,218,185));
+				} else {
+					//Make square dark color
+					g2.setColor(new Color(174,138,104));
 				}
 				g2.fillRect(row*SQUARE_SIZE, col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
 			}

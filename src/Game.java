@@ -15,9 +15,11 @@ public class Game extends JPanel implements Runnable{
 	private JFrame frame;
 	public static ArrayList<Piece> pieces = new ArrayList<>();
 	final int BOARD_SIZE = 640;
+	
 	private boolean running = true;
 	private final int FPS = 60;
 	private final long targetTime = 1000 / FPS; 
+	
 	private Mouse mouse = new Mouse();
 	private Piece activePiece;
 	boolean canMove;
@@ -25,10 +27,12 @@ public class Game extends JPanel implements Runnable{
 	boolean takePiece;
 	boolean whitesTurn = true;
 	
+	private King whiteKing, blackKing;
+	
 	public Game() {
 		
 		frame = new JFrame("Chess");
-		frame.getContentPane().setPreferredSize(new Dimension(BOARD_SIZE,BOARD_SIZE));
+		frame.getContentPane().setPreferredSize(new Dimension(900,BOARD_SIZE));
 		frame.pack(); 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
@@ -86,6 +90,7 @@ public class Game extends JPanel implements Runnable{
 	    				//Update Position
 	    				activePiece.setPrevX(activePiece.getxSquare());
 	        			activePiece.setPrevY(activePiece.getySquare());
+	        			castleKing(activePiece.getxSquare(), activePiece.getySquare());
 	        			activePiece.setFirstMove(false);
 	        			
 	        			//Take piece 
@@ -112,6 +117,31 @@ public class Game extends JPanel implements Runnable{
 		activePiece.setySquare(activePiece.getPrevY());
     }
     
+    public void castleKing(int x, int y) {
+    	
+    	if(getWhiteKing().canCastle(x, y)) {
+    		pieces.remove(getWhiteKing().getCastlingRook());
+    		//White Short castle
+    		if(x == 6) {
+    			pieces.add(new Rook(true, 5, 7));
+    		} else if (x == 2) {
+    			pieces.add(new Rook(true, 3, 7));
+    		}
+    	}
+    	
+    	if(getBlackKing().canCastle(x, y)) {
+    		pieces.remove(getBlackKing().getCastlingRook());
+    		//Black Short castle
+    		if(x == 6) {
+    			pieces.add(new Rook(false, 5, 0));
+    		} else if (x == 2) {
+    			pieces.add(new Rook(false, 3, 0));
+    		}
+    	}
+    	
+    	
+    }
+    
     private void simulate() {
     	canMove = false;
     	validSquare = false;
@@ -122,6 +152,7 @@ public class Game extends JPanel implements Runnable{
 		
 		if (activePiece.canMove(tempX, tempY)) {
 			validSquare = true;
+			
 			canMove = true;
 		}
 		
@@ -178,8 +209,10 @@ public class Game extends JPanel implements Runnable{
 		pieces.add(new Knight(true, 6, 7));
 		pieces.add(new Bishop(true, 2, 7));
 		pieces.add(new Bishop(true, 5, 7));
-		pieces.add(new Queen(true, 4, 7));
-		pieces.add(new King(true, 3, 7));
+		pieces.add(new Queen(true, 3, 7));
+		
+		setWhiteKing(new King(true, 4, 7));
+		pieces.add(getWhiteKing());
 		
 		
 		//Black Pieces
@@ -197,15 +230,33 @@ public class Game extends JPanel implements Runnable{
 		pieces.add(new Knight(false, 6, 0));
 		pieces.add(new Bishop(false, 2, 0));
 		pieces.add(new Bishop(false, 5, 0));
-		pieces.add(new Queen(false, 4, 0));
-		pieces.add(new King(false, 3, 0));
+		pieces.add(new Queen(false, 3, 0));
+		
+		setBlackKing(new King(false, 4, 0));
+		pieces.add(getBlackKing());
 	
+	}
+
+	public King getWhiteKing() {
+		return whiteKing;
+	}
+
+	public void setWhiteKing(King whiteKing) {
+		this.whiteKing = whiteKing;
+	}
+
+	public King getBlackKing() {
+		return blackKing;
+	}
+
+	public void setBlackKing(King blackKing) {
+		this.blackKing = blackKing;
 	}
 	
 	// Main
-	public static void main(String[] args) {
-		new Game();
-		
-	}
+		public static void main(String[] args) {
+			new Game();
+			
+		}
 
 }
