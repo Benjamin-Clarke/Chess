@@ -7,9 +7,12 @@ public class Pawn extends Piece {
 	private static final long serialVersionUID = 1L;
 	
 	private ImageIcon image;
+	private Piece enPassantCapture;
 
 	public Pawn(boolean white, int xSquare, int ySquare) {
 		super(white, xSquare, ySquare);
+		
+		type = Type.PAWN;
 	}
 	
 	public ImageIcon setColor() {
@@ -56,7 +59,7 @@ public class Pawn extends Piece {
 			//Moving 2 spaces
 			if( this.getPrevX() == x && (y == this.getPrevY() + (2*moveDirection)) && isFirstMove() 
 					&& !pieceInfrontOfPawn()) {
-				
+				this.setTwoStepped(true);
 				return true;
 			} 
 			
@@ -74,8 +77,73 @@ public class Pawn extends Piece {
 				return true;
 			}
 			
+			//En Passant 
+			if(canEnPassant(x, y)) {
+				return true;
+			}
 			
 		}
+		return false;
+	}
+	
+	public boolean canPrint() {
+		return true;
+	}
+	
+	public boolean canEnPassant(int x, int y) {
+		int moveDirection;
+		
+		if(isWhite()) {
+			moveDirection = -1;
+		} else {
+			moveDirection = 1;
+		}
+		
+
+		if(this.isWhite() && y == 2 ) {
+			//Takes Right
+			if((x - this.getPrevX()) == 1 && y == (this.getPrevY() + moveDirection) 
+					&& getPiece(this.getPrevX() + 1, this.getPrevY()) != null 
+					&& getPiece(this.getPrevX() + 1, this.getPrevY()).type == Type.PAWN
+					&& getPiece(this.getPrevX() + 1, this.getPrevY()).isTwoStepped() 
+					) {
+				setEnPassantCapture(getPiece(this.getPrevX() + 1, this.getPrevY()));
+				return true;
+			}
+			
+			//Takes Left
+			if((this.getPrevX() - x) == 1 && y == (this.getPrevY() + moveDirection) 
+					&& getPiece(this.getPrevX() - 1, this.getPrevY()) != null 
+					&& getPiece(this.getPrevX() - 1, this.getPrevY()).type == Type.PAWN
+					&& getPiece(this.getPrevX() - 1, this.getPrevY()).isTwoStepped() 
+					) {
+				setEnPassantCapture(getPiece(this.getPrevX() - 1, this.getPrevY()));
+				return true;
+			}
+		}
+		
+		//Black
+		if(!this.isWhite() && y == 5) {
+			//Takes Right
+			if((x - this.getPrevX()) == 1 && y == (this.getPrevY() + moveDirection) 
+					&& getPiece(this.getPrevX() + 1, this.getPrevY()) != null 
+					&& getPiece(this.getPrevX() + 1, this.getPrevY()).type == Type.PAWN
+					&& getPiece(this.getPrevX() + 1, this.getPrevY()).isTwoStepped() 
+					) {
+				setEnPassantCapture(getPiece(this.getPrevX() + 1, this.getPrevY()));
+				return true;
+			}
+			//Takes Left
+			if((this.getPrevX() - x) == 1 && y == (this.getPrevY() + moveDirection) 
+					&& getPiece(this.getPrevX() - 1, this.getPrevY()) != null 
+					&& getPiece(this.getPrevX() - 1, this.getPrevY()).type == Type.PAWN
+					&& getPiece(this.getPrevX() - 1, this.getPrevY()).isTwoStepped() 
+					) {
+				setEnPassantCapture(getPiece(this.getPrevX() - 1, this.getPrevY()));
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -93,6 +161,14 @@ public class Pawn extends Piece {
 		}
 		
 		return false;
+	}
+
+	public Piece getEnPassantCapture() {
+		return enPassantCapture;
+	}
+
+	public void setEnPassantCapture(Piece enPassantCapture) {
+		this.enPassantCapture = enPassantCapture;
 	}
 
 }

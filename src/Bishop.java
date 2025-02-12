@@ -10,6 +10,8 @@ public class Bishop extends Piece {
 
 	public Bishop(boolean white, int xSquare, int ySquare) {
 		super(white, xSquare, ySquare);
+		
+		type = Type.BISHOP;
 	}
 
 

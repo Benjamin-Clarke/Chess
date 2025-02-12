@@ -10,6 +10,8 @@ public class Queen extends Piece {
 
 	public Queen(boolean white, int xSquare, int ySquare) {
 		super(white, xSquare, ySquare);
+		
+		type = Type.QUEEN;
 	}
 
 

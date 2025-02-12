@@ -88,15 +88,26 @@ public class Game extends JPanel implements Runnable{
     			//if (activePiece.isWhite() == whitesTurn) {
 	    			if(validSquare) {
 	    				//Update Position
-	    				activePiece.setPrevX(activePiece.getxSquare());
-	        			activePiece.setPrevY(activePiece.getySquare());
-	        			castleKing(activePiece.getxSquare(), activePiece.getySquare());
+	    				int x = activePiece.getxSquare();
+	    				int y = activePiece.getySquare();
+	    				
+	    				if(activePiece.type == Type.PAWN) {
+	        				checkEnPassant(x, y);
+	        			}
+	    				
+	    				activePiece.setPrevX(x);
+	        			activePiece.setPrevY(y);
+	        			castleKing(x, y);
+	        			promotePawn(x, y);
+	   
 	        			activePiece.setFirstMove(false);
 	        			
 	        			//Take piece 
 	        			if(takePiece) {
 	        				pieces.remove(activePiece.isHittingPiece(activePiece.getxSquare(), activePiece.getySquare()));
 	        			}
+	        			
+	        			resetTwoSteppedStatus(!activePiece.isWhite());
         			
 	        			//whitesTurn = !whitesTurn;
 	    			//}
@@ -117,6 +128,16 @@ public class Game extends JPanel implements Runnable{
 		activePiece.setySquare(activePiece.getPrevY());
     }
     
+    public void promotePawn(int x, int y) {
+    	if(activePiece.isWhite() && y == 0) {
+    		pieces.remove(activePiece);
+    		pieces.add(new Queen(true, x, y));
+    	} else if(!activePiece.isWhite() && y == 7) {
+    		pieces.remove(activePiece);
+    		pieces.add(new Queen(false, x, y));
+    	}
+    }
+    
     public void castleKing(int x, int y) {
     	
     	if(getWhiteKing().canCastle(x, y)) {
@@ -125,6 +146,7 @@ public class Game extends JPanel implements Runnable{
     		if(x == 6) {
     			pieces.add(new Rook(true, 5, 7));
     		} else if (x == 2) {
+    			//white long castle
     			pieces.add(new Rook(true, 3, 7));
     		}
     	}
@@ -135,10 +157,26 @@ public class Game extends JPanel implements Runnable{
     		if(x == 6) {
     			pieces.add(new Rook(false, 5, 0));
     		} else if (x == 2) {
+    			//black long castle
     			pieces.add(new Rook(false, 3, 0));
     		}
     	}
-    	
+    	 	
+    }
+    
+    public void checkEnPassant(int x, int y) {
+    	if(((Pawn) activePiece).canEnPassant(x, y)) {
+    		pieces.remove(((Pawn) activePiece).getEnPassantCapture());
+    	}
+    }
+    
+    public void resetTwoSteppedStatus(boolean white) {
+    
+		for(Piece piece: pieces) {
+			if(piece.isWhite() == white && piece.type == Type.PAWN) {
+				piece.setTwoStepped(false);
+			}
+		}
     	
     }
     

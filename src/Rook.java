@@ -10,6 +10,8 @@ public class Rook extends Piece {
 
 	public Rook(boolean white, int xSquare, int ySquare) {
 		super(white, xSquare, ySquare);
+		
+		type = Type.ROOK;
 	}
 
 

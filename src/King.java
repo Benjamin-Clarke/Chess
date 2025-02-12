@@ -11,6 +11,8 @@ public class King extends Piece {
 
 	public King(boolean white, int xSquare, int ySquare) {
 		super(white, xSquare, ySquare);
+		
+		type = Type.KING;
 	}
 
 

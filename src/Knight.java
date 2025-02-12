@@ -10,6 +10,8 @@ public class Knight extends Piece {
 
 	public Knight(boolean white, int xSquare, int ySquare) {
 		super(white, xSquare, ySquare);
+		
+		type = Type.KNIGHT;
 	}
 
 

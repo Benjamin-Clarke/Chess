@@ -14,6 +14,8 @@ public abstract class Piece extends JPanel {
     private int ySquare;
     private ImageIcon image;
     private Piece hittingPiece;
+    public Type type;
+    private boolean twoStepped;
 
     public Piece(boolean white, int xSquare, int ySquare) {
         setWhite(white);
@@ -206,5 +208,13 @@ public abstract class Piece extends JPanel {
 
 	public void setHittingPiece(Piece hittingPiece) {
 		this.hittingPiece = hittingPiece;
+	}
+
+	public boolean isTwoStepped() {
+		return twoStepped;
+	}
+
+	public void setTwoStepped(boolean twoStepped) {
+		this.twoStepped = twoStepped;
 	}
 }
