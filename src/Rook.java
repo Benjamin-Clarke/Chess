@@ -46,7 +46,7 @@ public class Rook extends Piece {
 	@Override
 	public boolean canMove(int x, int y) {
 		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
-			if ((getPrevX() == x || getPrevY() == y) && !pieceOnStraightLinePath(getPrevX(), getPrevY(), x, y)) {
+			if ((getPrevX() == x ^ getPrevY() == y) && !pieceOnStraightLinePath(getPrevX(), getPrevY(), x, y)) {
 				return true;
 			}
 		}

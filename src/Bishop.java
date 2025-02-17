@@ -53,7 +53,10 @@ public class Bishop extends Piece {
 		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
 			if( (Math.abs(x - getPrevX()) == Math.abs(y - getPrevY())) 
 					&& !pieceOnDiagonalPath(getPrevX(), getPrevY(), x, y) ) {
-				return true;
+				if(x != getPrevX() && y != getPrevY()) {
+					return true;
+				}
+				
 			}
 		}
 		

@@ -6,6 +6,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Game extends JPanel implements Runnable{
@@ -14,6 +15,7 @@ public class Game extends JPanel implements Runnable{
 	private Board board = new Board();
 	private JFrame frame;
 	public static ArrayList<Piece> pieces = new ArrayList<>();
+	public static ArrayList<Piece> copyPieces = new ArrayList<>();
 	final int BOARD_SIZE = 640;
 	
 	private boolean running = true;
@@ -21,10 +23,11 @@ public class Game extends JPanel implements Runnable{
 	private final long targetTime = 1000 / FPS; 
 	
 	private Mouse mouse = new Mouse();
-	private Piece activePiece;
+	private Piece activePiece, checkingPiece;
 	boolean canMove;
 	boolean validSquare;
 	boolean takePiece;
+	boolean gameOver;
 	boolean whitesTurn = true;
 	
 	private King whiteKing, blackKing;
@@ -32,7 +35,7 @@ public class Game extends JPanel implements Runnable{
 	public Game() {
 		
 		frame = new JFrame("Chess");
-		frame.getContentPane().setPreferredSize(new Dimension(900,BOARD_SIZE));
+		frame.getContentPane().setPreferredSize(new Dimension(BOARD_SIZE,BOARD_SIZE));
 		frame.pack(); 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
@@ -73,7 +76,9 @@ public class Game extends JPanel implements Runnable{
     					mouse.x <= piece.getxSquare() * board.SQUARE_SIZE + piece.getImage().getIconWidth() &&
     					mouse.y >= piece.getySquare() * board.SQUARE_SIZE &&
     					mouse.y <= piece.getySquare() * board.SQUARE_SIZE + piece.getImage().getIconHeight()) {
-        				activePiece = piece;
+        				if (piece.isWhite() == whitesTurn) {
+        					activePiece = piece;
+        				}
         			}	
         		} else {
         			simulate();
@@ -85,21 +90,35 @@ public class Game extends JPanel implements Runnable{
     		
     		if(activePiece != null) {
     			
-    			//if (activePiece.isWhite() == whitesTurn) {
+    		
 	    			if(validSquare) {
-	    				//Update Position
 	    				int x = activePiece.getxSquare();
 	    				int y = activePiece.getySquare();
-	    				
+	    			
+	    				//En Passant
 	    				if(activePiece.type == Type.PAWN) {
 	        				checkEnPassant(x, y);
 	        			}
 	    				
+	    				//Update Position
 	    				activePiece.setPrevX(x);
 	        			activePiece.setPrevY(y);
+	        			
+	        			if(isKingInCheck() && isCheckmate()) {
+	        				gameOver = true;
+	        				if(whitesTurn) {
+	        					JOptionPane.showMessageDialog(frame, "White wins!!");
+	        				} else {
+	        					JOptionPane.showMessageDialog(frame, "Black wins!!");
+	        				}
+	        				
+	        			}
+	        			
+	        			//Check if it is a castling move or a promotion
 	        			castleKing(x, y);
 	        			promotePawn(x, y);
 	   
+	        			//It is no longer the pieces first move
 	        			activePiece.setFirstMove(false);
 	        			
 	        			//Take piece 
@@ -108,12 +127,13 @@ public class Game extends JPanel implements Runnable{
 	        			}
 	        			
 	        			resetTwoSteppedStatus(!activePiece.isWhite());
+	        			
         			
-	        			//whitesTurn = !whitesTurn;
-	    			//}
+	        			//Change player turn
+	        			whitesTurn = !whitesTurn;
+	    			
 	    			
     			} else {
-    				//Reset Position
     				resetPiece();
     			}	
     			
@@ -123,7 +143,263 @@ public class Game extends JPanel implements Runnable{
     		
     }
     
-    public void resetPiece() {
+    private void simulate() {
+    	canMove = false;
+    	validSquare = false;
+    	takePiece = false;
+    	
+    	int tempX = (mouse.x) / board.SQUARE_SIZE;
+		int tempY = (mouse.y) / board.SQUARE_SIZE;
+		
+		if (activePiece.canMove(tempX, tempY)) {
+			
+			canMove = true;
+			validSquare = true;
+			
+			if(isIllegal(activePiece) || ( opponentCanCaptureKing() && !canCaptureCheckingPiece())) {
+				validSquare = false;
+			}
+			
+			if (activePiece.canTake(tempX, tempY)) {
+				takePiece = true;
+			}	
+			
+		}
+
+		activePiece.setxSquare(tempX);
+		activePiece.setySquare(tempY);
+
+	}
+    
+    /*
+    private boolean canCaptureWithPinnedPiece() {
+    	int x = (mouse.x) / board.SQUARE_SIZE;
+		int y = (mouse.y) / board.SQUARE_SIZE;
+		
+    	if(activePiece.canTake(x, y) && getPiece(x, y) != null) {
+    		
+    		pieces.add(getPiece(x, y));
+    	}
+    	
+    	if(opponentCanCaptureKing() == false) {
+    		copyList(copyPieces, pieces);
+    		return true;
+    	}
+    	
+    	copyList(copyPieces, pieces);
+    	return false;
+    }
+    
+    */
+    
+    private boolean canCaptureCheckingPiece() {
+    	
+    	int x = (mouse.x) / board.SQUARE_SIZE;
+    	int y = (mouse.y) / board.SQUARE_SIZE;
+    	
+    	if(checkingPiece != null && activePiece.canTake(checkingPiece.getxSquare(), checkingPiece.getySquare()) 
+				&& x == checkingPiece.getxSquare() && y == checkingPiece.getySquare()
+				) {
+		
+			return true;
+		}
+    	
+    	return false;
+    }
+    
+    private boolean opponentCanCaptureKing() {	
+    	Piece king = getKing(false);
+    	
+		for(Piece piece: pieces) {
+			if(piece.isWhite() != king.isWhite() && piece.canMove(king.getxSquare(), king.getySquare())) {
+					return true;
+			}
+		}
+		
+    	return false; 
+    }
+    
+    private boolean isCheckmate() {
+    	Piece king = getKing(true);
+    	
+    	if(kingCanMove(king)) {
+    		return false;
+    	} else {
+    		
+    		int colDiff = Math.abs(checkingPiece.getxSquare() - king.getxSquare());
+    		int rowDiff = Math.abs(checkingPiece.getySquare() - king.getySquare());
+
+    		if(colDiff == 0) {
+    			//vertical attack
+    			if(checkingPiece.getxSquare() < king.getxSquare()) {
+    				for(int row = checkingPiece.getxSquare(); row < king.getxSquare(); row++) {
+    					for(Piece piece: pieces) {
+    						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(checkingPiece.getxSquare(), row)) {
+    							return false;
+    						}
+    					}
+    				}
+    			}
+    			
+    			if(checkingPiece.getxSquare() > king.getxSquare()) {
+    				for(int row = checkingPiece.getxSquare(); row > king.getxSquare(); row--) {
+    					for(Piece piece: pieces) {
+    						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(checkingPiece.getxSquare(), row)) {
+    							return false;
+    						}
+    					}
+    				}
+    			}
+    			 
+    		} else if(rowDiff == 0) {
+    			//horizontally
+    			
+    			if(checkingPiece.getySquare() < king.getySquare()) {
+    				for(int col = checkingPiece.getySquare(); col < king.getySquare(); col++) {
+    					for(Piece piece: pieces) {
+    						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, checkingPiece.getySquare())) {
+    							return false;
+    						}
+    					}
+    				}
+    			}
+    			
+    			if(checkingPiece.getySquare() > king.getySquare()) {
+    				for(int col = checkingPiece.getySquare(); col > king.getySquare(); col--) {
+    					for(Piece piece: pieces) {
+    						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, checkingPiece.getySquare())) {
+    							return false;
+    						}
+    					}
+    				}
+    			}
+    			
+    		} else if(colDiff == rowDiff) {
+    			//diagonally
+    			if(checkingPiece.getxSquare() < king.getxSquare()) {
+    				if(checkingPiece.getySquare() < king.getySquare()) {
+        				for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col < king.getySquare(); col++, row++) {
+        					for(Piece piece: pieces) {
+        						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
+        							return false;
+        						}
+        					}
+        				}
+        			}
+    				if(checkingPiece.getySquare() > king.getySquare()) {
+    					for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col > king.getySquare(); col--, row++) {
+        					for(Piece piece: pieces) {
+        						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
+        							return false;
+        						}
+        					}
+        				}
+        			}
+    			}
+    			
+    			if(checkingPiece.getxSquare() > king.getxSquare()) {
+    				if(checkingPiece.getySquare() < king.getySquare()) {
+    					for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col < king.getySquare(); col++, row--) {
+        					for(Piece piece: pieces) {
+        						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
+        							return false;
+        						}
+        					}
+        				}
+        			}
+    				if(checkingPiece.getySquare() > king.getySquare()) {
+    					for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col > king.getySquare(); col--, row--) {
+        					for(Piece piece: pieces) {
+        						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
+        							return false;
+        						}
+        					}
+        				}
+        			} 
+    			}
+    		} 
+    	}
+    	
+    	return true;
+    }
+    
+    private boolean kingCanMove(Piece king) {
+    	
+    	if(isValidMove(king, -1, -1)) {return true;}
+    	if(isValidMove(king, 0, -1)) {return true;}
+    	if(isValidMove(king, 1, -1)) {return true;}
+    	if(isValidMove(king, -1, 0)) {return true;}
+    	if(isValidMove(king, -1, 1)) {return true;}
+    	if(isValidMove(king, 1, 0)) {return true;}
+    	if(isValidMove(king, 1, 1)) {return true;}
+    	if(isValidMove(king, 0, 1)) {return true;}
+    	
+    	return false;
+    }
+    
+    private boolean isValidMove(Piece king, int xPlus, int yPlus) {
+    	
+    	//copy Pieces
+    	copyList(pieces, copyPieces);
+    	
+    	boolean isValidMove = false;
+    	
+    	int col = king.getPrevX() + xPlus;
+    	int row = king.getPrevY() + yPlus;
+    	//Simulate
+    	king.setxSquare(col);
+    	king.setySquare(row);
+    	
+    	if(king.canMove(king.getxSquare(), king.getySquare())) {
+    		
+    		if(king.getHittingPiece() != null) {
+    			pieces.remove(king.getHittingPiece());
+    		}
+    		if(!isIllegal(king)) {
+    			isValidMove = true;
+    		}
+    	}
+    	
+    	//Reset Position
+    	king.setxSquare(col - xPlus);
+    	king.setySquare(row - yPlus);
+    	
+    	copyList(copyPieces, pieces);
+    	
+    	return isValidMove;
+    }
+    
+    private boolean isKingInCheck() {
+        Piece king = getKing(true);
+        
+        for (Piece piece : pieces) {
+            if (piece.isWhite() != king.isWhite() && piece.canMove(king.getxSquare(), king.getySquare())) {
+                checkingPiece = piece; // Track the piece giving check
+                return true;
+            }
+        }
+        checkingPiece = null; // Reset if no piece is giving check
+        return false;
+    }
+
+    private Piece getKing(boolean opponent) {
+    	Piece king = null;
+    	
+    	for(Piece piece: pieces) {
+    		if (opponent) {
+    			if(piece.type == Type.KING && piece.isWhite() != whitesTurn) {
+    				king = piece;
+    			}
+    		} else {
+    			if(piece.type == Type.KING && piece.isWhite() == whitesTurn) {
+    				king = piece;
+    			}
+    		}
+    	}
+    	return king;
+    }
+
+	public void resetPiece() {
     	activePiece.setxSquare(activePiece.getPrevX());
 		activePiece.setySquare(activePiece.getPrevY());
     }
@@ -180,30 +456,16 @@ public class Game extends JPanel implements Runnable{
     	
     }
     
-    private void simulate() {
-    	canMove = false;
-    	validSquare = false;
-    	takePiece = false;
-    	
-    	int tempX = (mouse.x) / board.SQUARE_SIZE;
-		int tempY = (mouse.y) / board.SQUARE_SIZE;
-		
-		if (activePiece.canMove(tempX, tempY)) {
-			validSquare = true;
-			
-			canMove = true;
-		}
-		
-		if (activePiece.canTake(tempX, tempY)) {
-			takePiece = true;
-		}
-		
-		
-		activePiece.setxSquare(tempX);
-		activePiece.setySquare(tempY);
-		
-		
-	}
+    public boolean isIllegal(Piece king) {
+    	if(king.type == Type.KING) {
+    		for(Piece piece: pieces) {
+    			if(piece != king && piece.isWhite() != king.isWhite() && piece.canMove(king.getxSquare(), king.getySquare())) {
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
 
 	@Override
     protected void paintComponent(Graphics g) {
@@ -219,14 +481,28 @@ public class Game extends JPanel implements Runnable{
         
         if(activePiece != null) {
         	if (canMove) {
-        		g2.setColor(Color.white);
-            	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
-            	g2.fillRect(activePiece.getxSquare()*board.SQUARE_SIZE, activePiece.getySquare()*board.SQUARE_SIZE, board.SQUARE_SIZE, board.SQUARE_SIZE);
-            	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        		if(isIllegal(activePiece) || ( opponentCanCaptureKing() && !canCaptureCheckingPiece())) {
+        			g2.setColor(Color.red);
+                	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
+                	g2.fillRect(activePiece.getxSquare()*board.SQUARE_SIZE, activePiece.getySquare()*board.SQUARE_SIZE, board.SQUARE_SIZE, board.SQUARE_SIZE);
+                	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        		} else {
+        			g2.setColor(Color.white);
+                	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+                	g2.fillRect(activePiece.getxSquare()*board.SQUARE_SIZE, activePiece.getySquare()*board.SQUARE_SIZE, board.SQUARE_SIZE, board.SQUARE_SIZE);
+                	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        		}
         	}
       
         	activePiece.paintComponent(g2);
-        }
+        } 
+        if(checkingPiece != null) {
+        	g2.setColor(Color.red);
+        	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
+        	g2.fillRect(getKing(false).getPrevX()*board.SQUARE_SIZE, getKing(false).getPrevY()*board.SQUARE_SIZE, board.SQUARE_SIZE, board.SQUARE_SIZE);
+        	g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+		}
+        
     }
 
 	
@@ -236,8 +512,9 @@ public class Game extends JPanel implements Runnable{
 		pieces.add(new Pawn(true, 0, 6));
 		pieces.add(new Pawn(true, 1, 6));
 		pieces.add(new Pawn(true, 2, 6));
-		pieces.add(new Pawn(true, 3, 6));
-		pieces.add(new Pawn(true, 4, 6));
+		pieces.add(new Pawn(true, 3, 4));
+		pieces.add(new Pawn(true, 4, 4
+				));
 		pieces.add(new Pawn(true, 5, 6));
 		pieces.add(new Pawn(true, 6, 6));
 		pieces.add(new Pawn(true, 7, 6));
@@ -257,8 +534,8 @@ public class Game extends JPanel implements Runnable{
 		pieces.add(new Pawn(false, 0, 1));
 		pieces.add(new Pawn(false, 1, 1));
 		pieces.add(new Pawn(false, 2, 1));
-		pieces.add(new Pawn(false, 3, 1));
-		pieces.add(new Pawn(false, 4, 1));
+		pieces.add(new Pawn(false, 3, 3));
+		pieces.add(new Pawn(false, 4, 3));
 		pieces.add(new Pawn(false, 5, 1));
 		pieces.add(new Pawn(false, 6, 1));
 		pieces.add(new Pawn(false, 7, 1));
@@ -274,6 +551,23 @@ public class Game extends JPanel implements Runnable{
 		pieces.add(getBlackKing());
 	
 	}
+	
+	public void copyList(ArrayList<Piece> original, ArrayList<Piece> target) {
+		target.clear();
+		for(int i = 0; i < original.size(); i ++) {
+			target.add(original.get(i));
+		}
+		
+	}
+	
+	public Piece getPiece(int x, int y) {
+    	for (Piece piece: pieces) {
+    		if (piece.getxSquare() == x && piece.getySquare() == y) {
+    			return piece;
+    		}
+    	}
+    	return null;
+	 }
 
 	public King getWhiteKing() {
 		return whiteKing;

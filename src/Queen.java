@@ -48,7 +48,9 @@ public class Queen extends Piece {
 		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
 			if(Math.abs(x - getPrevX()) == Math.abs(y - getPrevY()) || getPrevX() == x || getPrevY() == y ) {
 				if(!pieceOnQueenPath(getPrevX(), getPrevY(), x, y)) {
-					return true;
+					if((x != getPrevX() ^ y != getPrevY()) || (x != getPrevX() && y != getPrevY())) {
+						return true;
+					}
 				}	
 			}
 		}

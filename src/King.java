@@ -48,15 +48,15 @@ public class King extends Piece {
 	public boolean canMove(int x, int y) {
 		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
 			
-			//System.out.println(x + ", " + y);
-		if(canCastle(x,y)) {
-				return true;
-			}
-			
-			if(Math.abs(x - getPrevX()) + Math.abs(y - getPrevY()) == 1 ||
-					Math.abs(x - getPrevX()) * Math.abs(y - getPrevY()) == 1) {
-				return true;
-			}
+				//System.out.println(x + ", " + y);
+			if(canCastle(x,y)) {
+					return true;
+				}
+				
+				if(Math.abs(x - getPrevX()) + Math.abs(y - getPrevY()) == 1 ||
+						Math.abs(x - getPrevX()) * Math.abs(y - getPrevY()) == 1) {
+					return true;
+				}
 			
 			
 		}
