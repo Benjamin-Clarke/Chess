@@ -227,12 +227,17 @@ public class Game extends JPanel implements Runnable{
     	} else {
     		
     		int colDiff = Math.abs(checkingPiece.getxSquare() - king.getxSquare());
+    		System.out.println(colDiff);
     		int rowDiff = Math.abs(checkingPiece.getySquare() - king.getySquare());
+    		System.out.println(rowDiff);
 
     		if(colDiff == 0) {
     			//vertical attack
-    			if(checkingPiece.getxSquare() < king.getxSquare()) {
-    				for(int row = checkingPiece.getxSquare(); row < king.getxSquare(); row++) {
+    			
+    			System.out.println("checking piece x: " + checkingPiece.getxSquare());
+    			System.out.println("king piece x: " + king.getxSquare());
+    			if(checkingPiece.getySquare() < king.getySquare()) {
+    				for(int row = checkingPiece.getySquare(); row < king.getySquare(); row++) {
     					for(Piece piece: pieces) {
     						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(checkingPiece.getxSquare(), row)) {
     							return false;
@@ -241,8 +246,8 @@ public class Game extends JPanel implements Runnable{
     				}
     			}
     			
-    			if(checkingPiece.getxSquare() > king.getxSquare()) {
-    				for(int row = checkingPiece.getxSquare(); row > king.getxSquare(); row--) {
+    			if(checkingPiece.getySquare() > king.getySquare()) {
+    				for(int row = checkingPiece.getySquare(); row > king.getySquare(); row--) {
     					for(Piece piece: pieces) {
     						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(checkingPiece.getxSquare(), row)) {
     							return false;
@@ -254,8 +259,8 @@ public class Game extends JPanel implements Runnable{
     		} else if(rowDiff == 0) {
     			//horizontally
     			
-    			if(checkingPiece.getySquare() < king.getySquare()) {
-    				for(int col = checkingPiece.getySquare(); col < king.getySquare(); col++) {
+    			if(checkingPiece.getxSquare() < king.getxSquare()) {
+    				for(int col = checkingPiece.getxSquare(); col < king.getxSquare(); col++) {
     					for(Piece piece: pieces) {
     						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, checkingPiece.getySquare())) {
     							return false;
@@ -264,8 +269,8 @@ public class Game extends JPanel implements Runnable{
     				}
     			}
     			
-    			if(checkingPiece.getySquare() > king.getySquare()) {
-    				for(int col = checkingPiece.getySquare(); col > king.getySquare(); col--) {
+    			if(checkingPiece.getxSquare() > king.getxSquare()) {
+    				for(int col = checkingPiece.getxSquare(); col > king.getxSquare(); col--) {
     					for(Piece piece: pieces) {
     						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, checkingPiece.getySquare())) {
     							return false;
@@ -277,8 +282,9 @@ public class Game extends JPanel implements Runnable{
     		} else if(colDiff == rowDiff) {
     			//diagonally
     			if(checkingPiece.getxSquare() < king.getxSquare()) {
+    				
     				if(checkingPiece.getySquare() < king.getySquare()) {
-        				for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col < king.getySquare(); col++, row++) {
+        				for(int col = checkingPiece.getxSquare(), row = checkingPiece.getySquare(); col < king.getxSquare(); col++, row++) {
         					for(Piece piece: pieces) {
         						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
         							return false;
@@ -287,7 +293,7 @@ public class Game extends JPanel implements Runnable{
         				}
         			}
     				if(checkingPiece.getySquare() > king.getySquare()) {
-    					for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col > king.getySquare(); col--, row++) {
+    					for(int col = checkingPiece.getxSquare(), row = checkingPiece.getySquare(); col > king.getxSquare(); col--, row++) {
         					for(Piece piece: pieces) {
         						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
         							return false;
@@ -298,8 +304,9 @@ public class Game extends JPanel implements Runnable{
     			}
     			
     			if(checkingPiece.getxSquare() > king.getxSquare()) {
+    				
     				if(checkingPiece.getySquare() < king.getySquare()) {
-    					for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col < king.getySquare(); col++, row--) {
+    					for(int col = checkingPiece.getxSquare(), row = checkingPiece.getySquare(); col < king.getxSquare(); col++, row--) {
         					for(Piece piece: pieces) {
         						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
         							return false;
@@ -308,7 +315,7 @@ public class Game extends JPanel implements Runnable{
         				}
         			}
     				if(checkingPiece.getySquare() > king.getySquare()) {
-    					for(int col = checkingPiece.getySquare(), row = checkingPiece.getxSquare(); col > king.getySquare(); col--, row--) {
+    					for(int col = checkingPiece.getxSquare(), row = checkingPiece.getySquare(); col > king.getxSquare(); col--, row--) {
         					for(Piece piece: pieces) {
         						if(piece != king && piece.isWhite() != whitesTurn && piece.canMove(col, row)) {
         							return false;

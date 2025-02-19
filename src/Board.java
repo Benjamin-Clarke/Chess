@@ -11,27 +11,6 @@ public class Board {
 	
 	
 	public Board() {
-	
-		/*
-		squares = new Square[8][8];
-		
-		for(int i = 0; i < 8; i++) {
-			for(int j = 0; j < 8; j++) {
-				squares[i][j] = new Square(i,j);
-				
-				if( (i+j) % 2 == 0) {
-					//Make square dark color
-					squares[i][j].drawSquare(true);
-				} else {
-					//Make square light color
-					squares[i][j].drawSquare(false);
-				}
-				
-				frame.add(squares[i][j].getPanel());
-			}	
-		}
-		
-		*/
 		
 	}
 	
