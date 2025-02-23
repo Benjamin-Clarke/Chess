@@ -49,7 +49,7 @@ public class King extends Piece {
 		if (isWithinBoard(x, y) && (isHittingPiece(x,y) == null || isHittingPiece(x,y).isWhite() != this.isWhite())) {
 			
 				//System.out.println(x + ", " + y);
-			if(canCastle(x,y)) {
+			if(canCastle(x,y) && !isThisKingInCheck()) {
 					return true;
 				}
 				
@@ -63,12 +63,23 @@ public class King extends Piece {
 		return false;
 	}
 	
+	 private boolean isThisKingInCheck() {
+	        
+	        for (Piece piece : Game.pieces) {
+	            if (piece.isWhite() != this.isWhite() && piece.canMove(this.getPrevX(), this.getPrevY())) {
+	                return true;
+	            }
+	        }
+	        return false;
+	    }
+	
 	public boolean canCastle(int x, int y) {
 		
 		//Castling short
 		if(x == 6) {
 			//With white
 			if(this.isWhite()) {
+				if(getPiece(7,7) != null && getPiece(7,7).type == Type.ROOK) 
 				setCastlingRook((Rook)getPiece(7,7));
 				
 				if(y == 7 && !pieceOnStraightLinePath(4, 7, 7, 7) && this.isFirstMove()
@@ -77,6 +88,7 @@ public class King extends Piece {
 				}
 			} else {
 				//Black
+				if(getPiece(7,0) != null && getPiece(7,0).type == Type.ROOK) 
 				setCastlingRook((Rook)getPiece(7,0));
 				
 				if(y == 0 && !pieceOnStraightLinePath(4, 0, 7, 0) && this.isFirstMove()
@@ -90,6 +102,7 @@ public class King extends Piece {
 				if(x == 2) {
 					//With white
 					if(this.isWhite()) {
+						if(getPiece(0,7) != null && getPiece(0,7).type == Type.ROOK) 
 						setCastlingRook((Rook)getPiece(0,7));
 						
 						if(y == 7 && !pieceOnStraightLinePath(4, 7, 0, 7) && this.isFirstMove()
@@ -98,6 +111,7 @@ public class King extends Piece {
 						}
 					} else {
 						//Black
+						if(getPiece(0,0) != null && getPiece(0,0).type == Type.ROOK) 
 						setCastlingRook((Rook)getPiece(0,0));
 						
 						if(y == 0 && !pieceOnStraightLinePath(4, 0, 0, 0) && this.isFirstMove()

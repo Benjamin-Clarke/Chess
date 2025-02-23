@@ -27,7 +27,7 @@ public class Game extends JPanel implements Runnable{
 	boolean canMove;
 	boolean validSquare;
 	boolean takePiece;
-	boolean gameOver;
+	boolean gameOver = false;
 	boolean whitesTurn = true;
 	
 	private King whiteKing, blackKing;
@@ -76,7 +76,7 @@ public class Game extends JPanel implements Runnable{
     					mouse.x <= piece.getxSquare() * board.SQUARE_SIZE + piece.getImage().getIconWidth() &&
     					mouse.y >= piece.getySquare() * board.SQUARE_SIZE &&
     					mouse.y <= piece.getySquare() * board.SQUARE_SIZE + piece.getImage().getIconHeight()) {
-        				if (piece.isWhite() == whitesTurn) {
+        				if (piece.isWhite() == whitesTurn && !gameOver) {
         					activePiece = piece;
         				}
         			}	
@@ -104,17 +104,25 @@ public class Game extends JPanel implements Runnable{
 	    				activePiece.setPrevX(x);
 	        			activePiece.setPrevY(y);
 	        			
+	        			//Check if the game has been won
 	        			if(isKingInCheck() && isCheckmate()) {
 	        				gameOver = true;
 	        				if(whitesTurn) {
-	        					JOptionPane.showMessageDialog(frame, "White wins!!");
+	        					JOptionPane.showMessageDialog(frame, "Checkmate! White wins!!");
 	        				} else {
-	        					JOptionPane.showMessageDialog(frame, "Black wins!!");
+	        					JOptionPane.showMessageDialog(frame, "Checkmate! Black wins!!");
 	        				}
 	        				
 	        			}
 	        			
-	        			//Check if it is a castling move or a promotion
+	        			if(!isKingInCheck()) {
+	        				if(isStalemate()) {
+		        				gameOver = true;
+		        				JOptionPane.showMessageDialog(frame, "Stalemate. The Game is a Draw");
+		        			}      			
+	        			}
+	        			
+	        			//Check if it is a castling move or a promotion  			
 	        			castleKing(x, y);
 	        			promotePawn(x, y);
 	   
@@ -225,17 +233,12 @@ public class Game extends JPanel implements Runnable{
     	if(kingCanMove(king)) {
     		return false;
     	} else {
-    		
     		int colDiff = Math.abs(checkingPiece.getxSquare() - king.getxSquare());
-    		System.out.println(colDiff);
     		int rowDiff = Math.abs(checkingPiece.getySquare() - king.getySquare());
-    		System.out.println(rowDiff);
 
     		if(colDiff == 0) {
     			//vertical attack
-    			
-    			System.out.println("checking piece x: " + checkingPiece.getxSquare());
-    			System.out.println("king piece x: " + king.getxSquare());
+
     			if(checkingPiece.getySquare() < king.getySquare()) {
     				for(int row = checkingPiece.getySquare(); row < king.getySquare(); row++) {
     					for(Piece piece: pieces) {
@@ -405,6 +408,30 @@ public class Game extends JPanel implements Runnable{
     	}
     	return king;
     }
+    
+    private boolean isStalemate() {
+    	Piece king = getKing(!whitesTurn);
+    	
+    	if(!kingCanMove(king) && !canAnyPieceMove(!whitesTurn)) {
+    		return true;
+    	}
+    	return false;
+    }
+    
+    private boolean canAnyPieceMove(boolean white) {
+    	
+    	for(Piece piece: pieces) {
+    		for(int x = 0; x < 7; x++) {
+    			for(int y = 0; y < 7; y++) {
+    				if(piece.isWhite() == white && piece.canMove(x, y) && piece.type != Type.KING) {
+    	    			return true;
+    	    		}
+    			}
+    		}
+    		
+    	}
+    	return false;
+    }
 
 	public void resetPiece() {
     	activePiece.setxSquare(activePiece.getPrevX());
@@ -412,12 +439,14 @@ public class Game extends JPanel implements Runnable{
     }
     
     public void promotePawn(int x, int y) {
-    	if(activePiece.isWhite() && y == 0) {
-    		pieces.remove(activePiece);
-    		pieces.add(new Queen(true, x, y));
-    	} else if(!activePiece.isWhite() && y == 7) {
-    		pieces.remove(activePiece);
-    		pieces.add(new Queen(false, x, y));
+    	if(activePiece.type == Type.PAWN) {
+	    	if(activePiece.isWhite() && y == 0) {
+	    		pieces.remove(activePiece);
+	    		pieces.add(new Queen(true, x, y));
+	    	} else if(!activePiece.isWhite() && y == 7) {
+	    		pieces.remove(activePiece);
+	    		pieces.add(new Queen(false, x, y));
+	    	}
     	}
     }
     
@@ -466,7 +495,7 @@ public class Game extends JPanel implements Runnable{
     public boolean isIllegal(Piece king) {
     	if(king.type == Type.KING) {
     		for(Piece piece: pieces) {
-    			if(piece != king && piece.isWhite() != king.isWhite() && piece.canMove(king.getxSquare(), king.getySquare())) {
+    			if(piece != king && piece.isWhite() != king.isWhite() && piece.canMove(king.getPrevX(), king.getPrevY())) {
     				return true;
     			}
     		}
@@ -516,21 +545,24 @@ public class Game extends JPanel implements Runnable{
 	public void setPieces() {
 		
 		//White Pieces
+		
 		pieces.add(new Pawn(true, 0, 6));
 		pieces.add(new Pawn(true, 1, 6));
 		pieces.add(new Pawn(true, 2, 6));
 		pieces.add(new Pawn(true, 3, 4));
-		pieces.add(new Pawn(true, 4, 4
-				));
+		pieces.add(new Pawn(true, 4, 4));
 		pieces.add(new Pawn(true, 5, 6));
 		pieces.add(new Pawn(true, 6, 6));
 		pieces.add(new Pawn(true, 7, 6));
 		pieces.add(new Rook(true, 0, 7));
-		pieces.add(new Rook(true, 7, 7));
+		
 		pieces.add(new Knight(true, 1, 7));
 		pieces.add(new Knight(true, 6, 7));
 		pieces.add(new Bishop(true, 2, 7));
 		pieces.add(new Bishop(true, 5, 7));
+		
+		pieces.add(new Pawn(true, 6, 6));
+		pieces.add(new Rook(true, 7, 7));
 		pieces.add(new Queen(true, 3, 7));
 		
 		setWhiteKing(new King(true, 4, 7));
@@ -538,6 +570,7 @@ public class Game extends JPanel implements Runnable{
 		
 		
 		//Black Pieces
+		
 		pieces.add(new Pawn(false, 0, 1));
 		pieces.add(new Pawn(false, 1, 1));
 		pieces.add(new Pawn(false, 2, 1));
@@ -551,12 +584,26 @@ public class Game extends JPanel implements Runnable{
 		pieces.add(new Knight(false, 1, 0));
 		pieces.add(new Knight(false, 6, 0));
 		pieces.add(new Bishop(false, 2, 0));
-		pieces.add(new Bishop(false, 5, 0));
 		pieces.add(new Queen(false, 3, 0));
 		
 		setBlackKing(new King(false, 4, 0));
 		pieces.add(getBlackKing());
-	
+		
+		
+		/* checkmate/stalemate Test Case
+		pieces.add(new Bishop(false, 5, 0));
+		
+		setBlackKing(new King(false, 0, 4));
+		pieces.add(getBlackKing());
+		pieces.add(new Queen(false, 2, 3));
+		pieces.add(new Pawn(false, 5, 4));
+		
+		
+		setWhiteKing(new King(true, 0, 7));
+		pieces.add(getWhiteKing());
+		
+		pieces.add(new Pawn(true, 5, 5));
+		*/
 	}
 	
 	public void copyList(ArrayList<Piece> original, ArrayList<Piece> target) {
